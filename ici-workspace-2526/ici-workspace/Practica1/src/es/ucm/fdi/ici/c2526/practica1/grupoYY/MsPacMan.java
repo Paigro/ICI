@@ -43,7 +43,7 @@ public class MsPacMan extends PacmanController
     	
     	public void addMove(MOVE move, int points)
     	{
-    		m
+    		moves.add(move);
     	}
     }
     
