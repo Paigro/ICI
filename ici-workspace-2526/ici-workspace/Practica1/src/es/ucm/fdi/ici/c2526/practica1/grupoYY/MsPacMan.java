@@ -1,5 +1,7 @@
 package es.ucm.fdi.ici.c2526.practica1.grupoYY;
 
+import java.util.Vector;
+
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -32,15 +34,16 @@ public class MsPacMan extends PacmanController
     
     class Path{
     	int points;
-    	MOVE [] moves;
+    	Vector<MOVE> moves;
     	
     	Path(int maxCells){
     		points = 0;
-    		moves = new MOVES[maxCells);
+    		moves = new Vector<>(maxCells); 
     	}
     	
-    	public void addMove(MOVE move, int points) {
-    		moves.moves.moves.move[move];
+    	public void addMove(MOVE move, int points)
+    	{
+    		m
     	}
     }
     
