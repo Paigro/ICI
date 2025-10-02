@@ -19,6 +19,7 @@ public class MsPacMan extends PacmanController
 {
 	int posObjetive = -1;
 	boolean runAway = false;
+	boolean edibleGhost = false;
     @Override
     public MOVE getMove(Game game, long timeDue)
     {
@@ -73,21 +74,27 @@ public class MsPacMan extends PacmanController
     	MoveCell targetCell = null;
     	int depth = 0; // Contador de profundidad.
     	
-    	// No Runaway
+    	// No Runaway.
     	runAway = false;
+    	// Hay fantasmas comestibles cerca.
+    	edibleGhost = false;
+    	for (GHOST ghostType : GHOST.values()) {
+    		if (game.isGhostEdible(ghostType))
+    			edibleGhost = true;
+    	}
     	
     	// Busqueda en anchura.
     	while (!toVisit.isEmpty() && depth < Math.pow(4,  maxDepth)) {
     		MoveCell current = toVisit.remove();
     		int currentNode = current.actualCell;
     		
-    		GHOST ghostHere = isGhost(game, currentNode);
-            if (ghostHere != null) 
-                // Si el fantasma NO es comestible, activa al huida.
-                if (game.isGhostEdible(ghostHere)) {
-                	runAway = true;
-                	
-                }
+    		// Mira si hay un fantasma para marcar la ruta como huida. 
+    		GHOST ghost = isGhost(game, currentNode);        	
+        	if (ghost != null )
+        		if(!game.isGhostEdible(ghost)) {
+        			System.out.println("HUYE");
+        			runAway = true;
+        		}
             
     		// Si hemos encontrado un camino valido terminamos la busqueda.
     		if (evaluatePath(game, currentNode)) {
@@ -123,8 +130,7 @@ public class MsPacMan extends PacmanController
     
     // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
     // True: sale de la busqueda devolviendo el camino actual.
-    // False: sigue buscando.
-    
+    // False: sigue buscando.    
     private boolean isRunAwayPath(Game game, int id) {
     	GHOST ghost = isGhost(game, id);
     	
@@ -140,6 +146,9 @@ public class MsPacMan extends PacmanController
     	return false;
     }
     
+    // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
+    // True: sale de la busqueda devolviendo el camino actual.
+    // False: sigue buscando.  
     private boolean isPointPath(Game game, int id) {
     	// Movimiento del PacMan:
  		
@@ -159,10 +168,11 @@ public class MsPacMan extends PacmanController
 	
     	GHOST ghost = isGhost(game, id);
     	
-    	if (ghost != null) {
-    		if (game.isGhostEdible(ghost)) { 			
+    	if (edibleGhost) {
+    		if (ghost!= null && game.isGhostEdible(ghost)) { 			
     			return true;
     		}
+    			return false;
     	}
     	return isActivePill(game, id);
     }
