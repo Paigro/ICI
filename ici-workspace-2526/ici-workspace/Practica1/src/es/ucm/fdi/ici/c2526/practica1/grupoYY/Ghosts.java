@@ -102,13 +102,14 @@ abstract class PersonalityGhost
 
 
     	// Inicializa los primeros movimientos sin volver atras.
-    	for (MOVE move : game.getPossibleMoves(startIndex)) {
-    		if (move != game.getGhostLastMoveMade(ghostType).opposite()) {
-    			int nextNode = game.getNeighbour(startIndex, move);
-    			toVisit.add(new MoveCell(nextNode, move));
-    		}
-		}
-    	
+        for (MOVE move : game.getPossibleMoves(startIndex)) {
+            if (move != game.getGhostLastMoveMade(ghostType).opposite()) {
+                int nextNode = game.getNeighbour(startIndex, move);
+                if (nextNode != -1) {
+                    toVisit.add(new MoveCell(nextNode, move));
+                }
+            }
+        }
     	// Si no hay movimientos posibles.
     	if (toVisit.isEmpty())
     		return new MoveCell(startIndex, MOVE.NEUTRAL);
@@ -117,31 +118,29 @@ abstract class PersonalityGhost
     	int depth = 0; // Contador de profundidad.
     	
     	// Busqueda en anchura.
-    	while (!toVisit.isEmpty() && depth < Math.pow(4,  maxDepth)) {
-    		MoveCell current = toVisit.remove();
-    		int nextNode = game.getNeighbour(current.actualCell, current.nextMove);
-    		
-    		// Si no se puede avanzar o se ha visitado ya, ignorar.
-    		if (nextNode == -1 || isInVisited(visited, nextNode))
-    			continue;
-    		
-    		// Si hemos encontrado un camino valido terminamos la busqueda.
-    		if (fountPath(game, nextNode)) {
-    			targetCell = current;
-    			break;
-    		}
-    		
-    		// Marcar como visitado.
-    		visited[depth] = current.actualCell;
-    		
-    		// Expandir a los vecinos.
-    		for(MOVE move : game.getPossibleMoves(nextNode)) {
-    			if (move == current.nextMove.opposite()) continue;
-    			int newNode = game.getNeighbour(nextNode, move);
-    			toVisit.add(new MoveCell(newNode, move, current));
-    		}
-    		depth++;
-    	}
+        while (!toVisit.isEmpty() && depth < Math.pow(4,  maxDepth)) {
+            MoveCell current = toVisit.remove();
+            int currentNode = current.actualCell;
+
+
+            // Si hemos encontrado un camino valido terminamos la busqueda.
+            if (fountPath(game, currentNode)) {
+                targetCell = current;
+                break;
+            }
+
+            // Marcar como visitado.
+            visited[depth] = current.actualCell;
+
+            // Expandir a los vecinos.
+            for(MOVE move : game.getPossibleMoves(currentNode)) {
+                if (move == current.nextMove.opposite()) continue;
+                int newNode = game.getNeighbour(currentNode, move);
+                if(newNode == -1 || isInVisited(visited, newNode)) continue;
+                toVisit.add(new MoveCell(newNode, move, current));
+            }
+            depth++;
+        }
     	
     	// Pinta los nodos que han sido visitados.
     	//GameView.addPoints(game, Color.ORANGE, visited);
@@ -402,8 +401,8 @@ public final class Ghosts extends GhostController
                 		{
                 			//System.out.println("Ahora soy random.");
                 			personalities.put(ghostType, new RandomGhost(ghostType));
-                			//moves.put(ghostType, MOVE.values()[rnd.nextInt(MOVE.values().length)]);
-                			//continue;
+                			moves.put(ghostType, MOVE.values()[rnd.nextInt(MOVE.values().length)]);
+                			continue;
                 		}
                 		else
                 		{
@@ -450,6 +449,6 @@ public final class Ghosts extends GhostController
     
     public String getName()
     {
-    	return "GhostsNeutral";
+    	return "GhostsAndrewPaigro";
     }
 }
