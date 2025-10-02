@@ -18,25 +18,16 @@ import pacman.game.GameView;
 public class MsPacMan extends PacmanController
 {
 	int posObjetive = -1;
+	boolean runAway = false;
     @Override
     public MOVE getMove(Game game, long timeDue)
     {
-    	// Movimiento del PacMan:
-    		
-    			
-    			// Si esta pacman detras de un fantasma no huye.
-    		
-    	// Sino buscar la Pill mas cercana calculando los caminos. Quedandose con el que no tenga power pill o en el caso de que ambos la tengan ir a por el mas cercano. Si es la misma distancia da igual.
-    	// Si hay un fantasma mas cerca de una Power Pill que yo me voy.
-    	
-    	// Calcular todos los caminos posibles y por pesos quedarse con el mejor.
-    	
-    	// Huida: descartar caminos
-    	
     	MoveCell objetiveCell = null;
     	if(requiereAccionPacman(game)) {
-
-    		objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 5);
+    		if (runAway)
+    			objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 7);
+    		else
+    			objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 7);
     		if (objetiveCell != null) {
     			posObjetive = objetiveCell.actualCell;
     			while(objetiveCell.prevCell != null)
@@ -66,7 +57,6 @@ public class MsPacMan extends PacmanController
     	
     	// Cola de nodos a visitar.
     	Queue<MoveCell> toVisit = new LinkedList<>();
-    	List<MoveCell> posibleWay = new ArrayList<MsPacMan.MoveCell>();
     	int[] visited = new int[(int)Math.pow(4, maxDepth)];
 
 
@@ -74,42 +64,45 @@ public class MsPacMan extends PacmanController
     	for (MOVE move : game.getPossibleMoves(startIndex)) {
     		if (move != game.getPacmanLastMoveMade().opposite()) {
     			int nextNode = game.getNeighbour(startIndex, move);
-    			CellType onCell = onCell(game, nextNode);
-    			toVisit.add(new MoveCell(nextNode, move, onCell));
+    			if (nextNode != -1) {
+    				toVisit.add(new MoveCell(nextNode, move));
+    			}
     		}
 		}
     	
     	MoveCell targetCell = null;
     	int depth = 0; // Contador de profundidad.
     	
+    	// No Runaway
+    	runAway = false;
+    	
     	// Busqueda en anchura.
     	while (!toVisit.isEmpty() && depth < Math.pow(4,  maxDepth)) {
     		MoveCell current = toVisit.remove();
-    		int nextNode = game.getNeighbour(current.actualCell, current.nextMove);
+    		int currentNode = current.actualCell;
     		
-    		// Si no se puede avanzar o se ha visitado ya, ignorar.
-    		if (nextNode == -1 || isInVisited(visited, nextNode)){
-    			posibleWay.add(current);
-    			continue;
-    		}
-    		
+    		GHOST ghostHere = isGhost(game, currentNode);
+            if (ghostHere != null) 
+                // Si el fantasma NO es comestible, activa al huida.
+                if (game.isGhostEdible(ghostHere))
+                    runAway = true;
+            
+            
     		// Si hemos encontrado un camino valido terminamos la busqueda.
-    		if (fountPath(game, nextNode)) {
-    			// Pinta los nodos que han sido visitados.
-    	    	GameView.addPoints(game, Color.ORANGE, visited);
-    			return targetCell;
+    		if (evaluatePath(game, currentNode)) {
+    	    	targetCell = current;
+    			break;
     		}
     		
     		// Marcar como visitado.
     		visited[depth] = current.actualCell;
     		
     		// Expandir a los vecinos.
-    		for(MOVE move : game.getPossibleMoves(nextNode)) {
+    		for(MOVE move : game.getPossibleMoves(currentNode)) {
     			if (move == current.nextMove.opposite()) continue;
-    			int newNode = game.getNeighbour(nextNode, move);
-    			CellType onCell = onCell(game, newNode);
-    			System.out.println(onCell);
-    			toVisit.add(new MoveCell(newNode, move, current, onCell));
+    			int newNode = game.getNeighbour(currentNode, move);
+    			if(newNode == -1 || isInVisited(visited, newNode)) continue;
+    			toVisit.add(new MoveCell(newNode, move, current));
     		}
     		depth++;
     	}
@@ -117,80 +110,65 @@ public class MsPacMan extends PacmanController
     	// Pinta los nodos que han sido visitados.
     	GameView.addPoints(game, Color.ORANGE, visited);
     	
-    	return getCellToMove(posibleWay);
+    	return targetCell;
     }
     
-    private MoveCell getCellToMove(List<MoveCell> posibleWays) {
-    	MoveCell bestMoveCell = null;
-    	int bestPoints = 0;
-    	for (MoveCell moveCell : posibleWays) {
-    		int points = 0;
-    		MoveCell auxCell = moveCell;
-			while (auxCell.prevCell != null) {
-				points += cellPoints(auxCell.contains);
-				auxCell = auxCell.prevCell;
-			}
-			if (points > bestPoints) {
-				bestPoints = points;
-				bestMoveCell = auxCell;
-			}
-		}
-    	
-    	return bestMoveCell;
-    }
-    
-      
-    private CellType onCell(Game game, int id) {
-    	GHOST ghost = isGhost(game, id);
-    	
-    	/*if (ghost != null) {
-    		if (game.isGhostEdible(ghost))
-    			return CellType.GhostEdible;
-    		else
-    			return CellType.Ghost;
-    	}*/
-    		    			
-    	if (isActivePowerPill(game,id))
-    		return CellType.PowerPill;
-    	if (isActivePill(game,id))
-    		return CellType.Pill; 
-    	
-    	return CellType.None;
-    }
-    
-    
-    private int cellPoints(CellType cellType) {
-    	switch(cellType) {
-    	case CellType.GhostEdible:
-    		return Constants.GHOST_EAT_SCORE;
-    	case CellType.Pill:
-    		return Constants.PILL;
-    	case CellType.PowerPill:
-    		return Constants.POWER_PILL;
-    	default:
-    		return 0;
-    	}
+    private boolean evaluatePath(Game game, int id) {
+    	if (runAway)
+    		return isRunAwayPath(game, id);
+    	else
+    		return isPointPath(game, id);
     }
     
     // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
     // True: sale de la busqueda devolviendo el camino actual.
     // False: sigue buscando.
-    GHOST ghost;
-    private boolean fountPath(Game game, int id) {
-    	 ghost = isGhost(game, id);
+    
+    private boolean isRunAwayPath(Game game, int id) {
+    	GHOST ghost = isGhost(game, id);
     	
-    	// Bool para indicar que huye?
-    	 // Si fantasma cerca:
-    	 	// Si comible ir a por el.
-    	 	// Si no es comible.
-    	 		// Ir a por Power Pill.  
-    	 		// Huir.
+    	if (ghost != null) {
+    		if (!game.isGhostEdible(ghost)) {
+				System.out.println("[Huida] Fantasma no comible");
+    			if(isActivePowerPill(game, id)){
+    				System.out.println("[Huida] PowePill");
+    				return true;
+    			}
+				System.out.println("[Huida] No PowePill");
+    			return false;
+    		}
+    	}
+		System.out.println("[Huida] Para huir");
+    	return false;
+    }
+    
+    private boolean isPointPath(Game game, int id) {
+    	// Movimiento del PacMan:
+ 		
+     	// Bool para indicar que huye?
+     	 // Si fantasma cerca:
+     	 	// Si comible ir a por el.
+     	 	// Si no es comible.
+     	 		// Ir a por Power Pill.  
+     	 		// Huir.
+			// Si esta pacman detras de un fantasma no huye.
+		
+    	 	// Sino buscar la Pill mas cercana calculando los caminos. Quedandose con el que no tenga power pill o en el caso de que ambos la tengan ir a por el mas cercano. Si es la misma distancia da igual.
+    	 	// Si hay un fantasma mas cerca de una Power Pill que yo me voy.
+    		// Huida: descartar caminos
+	
+    	 // Calcular todos los caminos posibles y por pesos quedarse con el mejor.
+	
+    	GHOST ghost = isGhost(game, id);
     	
-    	/*if (ghost != null) {
-    		if (game.isGhostEdible(ghost))
+    	if (ghost != null) {
+    		if (game.isGhostEdible(ghost)) {
+    			System.out.println("[No Huye] Fantasma comible");    			
     			return true;
-    		return isActivePowerPill(game, id);
-    	}*/
+    		}
+			System.out.println("[No Huye] Fantasma NO comible -> huir");
+    	}
+		System.out.println("[No Huye] Pildora normal");
     	return isActivePill(game, id);
     }
     
@@ -205,17 +183,17 @@ public class MsPacMan extends PacmanController
     
     // Devuelve true si en la id indicada hay una power pill.
     private boolean isActivePowerPill(Game game, int id) {
-    	int[] powerPillIndices = game.getCurrentMaze().powerPillIndices;
+    	int[] powerPillIndices = game.getCurrentMaze().powerPillIndices; 
         for (int i = 0; i < powerPillIndices.length; i++) {
             if (powerPillIndices[i] == id) {
-                return game.isPillStillAvailable(i);
+                return game.isPowerPillStillAvailable(i);
             }
         }
         return false;
     }
     // Devuelve true si en la id indicada hay una pill.
     private boolean isActivePill(Game game, int id) {
-    	int[] pillIndices = game.getCurrentMaze().pillIndices;
+    	int[] pillIndices = game.getCurrentMaze().pillIndices; 
         for (int i = 0; i < pillIndices.length; i++) { 
             if (pillIndices[i] == id) {
                 return game.isPillStillAvailable(i);
@@ -239,13 +217,12 @@ public class MsPacMan extends PacmanController
     	public MOVE nextMove;
     	public int actualCell;
     	public MoveCell prevCell; // Para reconstruir el camino.
-    	public CellType contains;
     	
-    	public MoveCell(int cell, MOVE move, MoveCell previous, CellType cellContains) {
-    		nextMove= move; actualCell = cell; prevCell = previous; contains = cellContains;
+    	public MoveCell(int cell, MOVE move, MoveCell previous) {
+    		nextMove= move; actualCell = cell; prevCell = previous; 
     	}
-    	public MoveCell(int cell, MOVE move, CellType cellContains) {
-    		nextMove= move; actualCell = cell; prevCell = null; contains = cellContains;
+    	public MoveCell(int cell, MOVE move) {
+    		nextMove= move; actualCell = cell; prevCell = null;
     	}
     			
     }
