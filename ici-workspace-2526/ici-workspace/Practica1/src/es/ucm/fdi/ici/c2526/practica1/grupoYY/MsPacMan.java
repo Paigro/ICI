@@ -84,9 +84,10 @@ public class MsPacMan extends PacmanController
     		GHOST ghostHere = isGhost(game, currentNode);
             if (ghostHere != null) 
                 // Si el fantasma NO es comestible, activa al huida.
-                if (game.isGhostEdible(ghostHere))
-                    runAway = true;
-            
+                if (game.isGhostEdible(ghostHere)) {
+                	runAway = true;
+                	
+                }
             
     		// Si hemos encontrado un camino valido terminamos la busqueda.
     		if (evaluatePath(game, currentNode)) {
@@ -129,16 +130,13 @@ public class MsPacMan extends PacmanController
     	
     	if (ghost != null) {
     		if (!game.isGhostEdible(ghost)) {
-				System.out.println("[Huida] Fantasma no comible");
     			if(isActivePowerPill(game, id)){
-    				System.out.println("[Huida] PowePill");
+    				System.out.println("HUYEE");
     				return true;
     			}
-				System.out.println("[Huida] No PowePill");
     			return false;
     		}
     	}
-		System.out.println("[Huida] Para huir");
     	return false;
     }
     
@@ -162,13 +160,10 @@ public class MsPacMan extends PacmanController
     	GHOST ghost = isGhost(game, id);
     	
     	if (ghost != null) {
-    		if (game.isGhostEdible(ghost)) {
-    			System.out.println("[No Huye] Fantasma comible");    			
+    		if (game.isGhostEdible(ghost)) { 			
     			return true;
     		}
-			System.out.println("[No Huye] Fantasma NO comible -> huir");
     	}
-		System.out.println("[No Huye] Pildora normal");
     	return isActivePill(game, id);
     }
     
