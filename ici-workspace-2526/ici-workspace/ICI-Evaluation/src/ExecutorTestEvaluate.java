@@ -33,9 +33,10 @@ es.ucm.fdi.ici.c2425.practica2.grupo04.Ghosts (2540)
 
  */
 
+import es.ucm.fdi.ici.c2526.practica1.grupoYY.Ghosts;
+import es.ucm.fdi.ici.c2526.practica1.grupoYY.MsPacMan;
 
-
-public class ExecutorTest {
+public class ExecutorTestEvaluate {
 
     public static void main(String[] args) {
         Executor executor = new Executor.Builder()
@@ -45,8 +46,8 @@ public class ExecutorTest {
                 .build();
 
         //PacmanController pacMan = new pacman.controllers.HumanController.HumanController(new pacman.controllers.HumanController.KeyBoardInput());
-        PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
-        GhostController ghosts = new es.ucm.fdi.ici.c2425.practica1.grupo08.Ghosts();
+        PacmanController pacMan = new MsPacMan();
+        GhostController ghosts = new Ghosts();
         
         System.out.println( 
             executor.runGame(pacMan, ghosts, 30) //last parameter defines speed
