@@ -46,11 +46,6 @@ public class MsPacMan extends PacmanController
         return game.getPossibleMoves(game.getPacmanCurrentNodeIndex(), game.getPacmanLastMoveMade()).length > 1;
     }
     
-    public String getName() {
-    	return "MsPacManNeutral";
-    }
-    
-    
     public MoveCell nextMove(Game game, int startIndex, int maxDepth) {
     	
     	// Cola de nodos a visitar.
@@ -94,10 +89,10 @@ public class MsPacMan extends PacmanController
         		}
             
     		// Si hemos encontrado un camino valido terminamos la busqueda.
-    		if (evaluatePath(game, currentNode)) {
+    		/*if (evaluatePath(game, currentNode)) {
     	    	targetCell = current;
     			break;
-    		}
+    		}*/
     		
     		// Marcar como visitado.
     		visited[depth] = current.actualCell;
@@ -140,23 +135,7 @@ public class MsPacMan extends PacmanController
     // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
     // True: sale de la busqueda devolviendo el camino actual.
     // False: sigue buscando.  
-    private boolean isPointPath(Game game, int id) {
-    	// Movimiento del PacMan:
- 		
-     	// Bool para indicar que huye?
-     	 // Si fantasma cerca:
-     	 	// Si comible ir a por el.
-     	 	// Si no es comible.
-     	 		// Ir a por Power Pill.  
-     	 		// Huir.
-			// Si esta pacman detras de un fantasma no huye.
-		
-    	 	// Sino buscar la Pill mas cercana calculando los caminos. Quedandose con el que no tenga power pill o en el caso de que ambos la tengan ir a por el mas cercano. Si es la misma distancia da igual.
-    	 	// Si hay un fantasma mas cerca de una Power Pill que yo me voy.
-    		// Huida: descartar caminos
-	
-    	 // Calcular todos los caminos posibles y por pesos quedarse con el mejor.
-	
+    private boolean isPointPath(Game game, int id) {	
     	GHOST ghost = isGhost(game, id);
     	
     	if (edibleGhost) {
@@ -223,5 +202,7 @@ public class MsPacMan extends PacmanController
     			
     }
     
-
+    public String getName() {
+    	return "MsPacManGrupoL";
+    }
 }
