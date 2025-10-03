@@ -10,6 +10,7 @@ import java.util.LinkedList;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -73,6 +74,12 @@ public class MsPacMan extends PacmanController
     	
     	// No Runaway.
     	runAway = false;
+    	// Mira si hay un fantasma para marcar la ruta como huida. 
+		GHOST ghost = getNearestChasingGhost(game,5);
+		if (ghost != null) {
+			return RunAwayMove(game, game.getGhostCurrentNodeIndex(ghost));
+		}
+		
     	// Hay fantasmas comestibles cerca.
     	edibleGhost = false;
     	for (GHOST ghostType : GHOST.values()) {
@@ -84,17 +91,9 @@ public class MsPacMan extends PacmanController
     	while (!toVisit.isEmpty() && depth < Math.pow(4,  maxDepth)) {
     		MoveCell current = toVisit.remove();
     		int currentNode = current.actualCell;
-    		
-    		// Mira si hay un fantasma para marcar la ruta como huida. 
-    		GHOST ghost = isGhost(game, currentNode);        	
-        	if (ghost != null )
-        		if(!game.isGhostEdible(ghost)) {
-        			System.out.println("HUYE");
-        			runAway = true;
-        		}
             
     		// Si hemos encontrado un camino valido terminamos la busqueda.
-    		if (evaluatePath(game, currentNode)) {
+        	if (isPointPath(game, currentNode)) {
     	    	targetCell = current;
     			break;
     		}
@@ -118,25 +117,30 @@ public class MsPacMan extends PacmanController
     	return targetCell;
     }
     
-    private boolean evaluatePath(Game game, int id) {
-    	if (runAway)
-    		return isRunAwayPath(game, id);
-    	else
-    		return isPointPath(game, id);
-    }
-    
     // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
     // True: sale de la busqueda devolviendo el camino actual.
     // False: sigue buscando.    
-    private boolean isRunAwayPath(Game game, int id) {
-    	GHOST ghost = isGhost(game, id);
-    	
-    	if (ghost!= null && game.isGhostEdible(ghost)) { 			
-    			return isActivePowerPill(game, id);
-    		}
-    	return false;
+    private MoveCell RunAwayMove(Game game, int actualCell) {
+    	return new MoveCell(actualCell, nextMoveAwayFrom(game, actualCell));
+    }
+    public GHOST getNearestChasingGhost(Game game, float limit) {
+        GHOST nearestGhost = GHOST.BLINKY;
+        int shortestDistance = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(nearestGhost));
+        for (GHOST ghostType : GHOST.values()) {
+        	int aux = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(ghostType));
+        	if (aux < shortestDistance) {
+        		shortestDistance = aux;
+        		nearestGhost = ghostType;
+        	}
+        }
+        
+        if (shortestDistance >= limit) return null;
+        return nearestGhost;
     }
     
+    public MOVE nextMoveAwayFrom(Game game, int index) {
+    	return game.getApproximateNextMoveAwayFromTarget(game.getPacmanCurrentNodeIndex(), index, game.getPacmanLastMoveMade(), DM.PATH); 
+    }
     // Este metodo se usa para saber si la celda actual esta dentro de un camino valido
     // True: sale de la busqueda devolviendo el camino actual.
     // False: sigue buscando.  
