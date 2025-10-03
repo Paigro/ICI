@@ -11,61 +11,8 @@ import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
-import pacman.game.GameView;
 
-//Si comibles huir, si no:
-// Si MS. mas cerca de power pill que fantasma, huir.
-// Sino ir a por ella.
-
-// 5 tipos?:
-// Aleatorio. Si se acerca mucho a por MS.
-// Perseguir por detras
-// Perseguir por delante
-// Rutita por Power Pills. Si se acerca mucho a por MS.
-// Evil Ms Pacman.
-
-// Huir: 
-// Descartar caminos con otros fantasmas comibles.
-// Si hay no comibles ir con ellos
-// Intentar ir por el camino con menos pills.
-
- /*class GHOST_PARAMETERS
-{
-	public GHOST name;
-	public int personality;
-	public int nextPersonalityChange;
-	
-    private Random rnd = new Random(); // Para generar randoms.
-
-	GHOST_PARAMETERS(GHOST n, int p, int np)
-	{
-		name = n;
-		personality = p;
-		nextPersonalityChange = np;
-	}
-	void changeGhostPersonality(int newPersonality)
-	{
-		personality = newPersonality;
-		nextPersonalityChange = rnd.nextInt(1, 10);
-		System.out.println(name + ": Change to: " + personality + " " + nextPersonalityChange);
-	}
-	int getPersonality()
-	{
-		//System.out.println(name + ": Get personality");
-		return personality;
-	}
-	int getNextChange()
-	{
-		//System.out.println(name + ": Get nextPersonalityChange");
-		return nextPersonalityChange;
-	}
-	void decrease()
-	{
-		nextPersonalityChange--;
-		//System.out.println(name + ": Decrease: " + nextPersonalityChange);
-	}
-}*/
-//Clase que almacena informacion del nodo a recorrer.
+// Clase que almacena informacion del nodo a recorrer.
 class MoveCell
 {
     public MOVE nextMove;
@@ -177,7 +124,7 @@ class RandomGhost extends PersonalityGhost
 		return true;
 	}
 }
-// Comportamiento que busca los caminos con un mayor numero de puntos.
+// Comportamiento que ir a la casilla siguiente del MsPacMan.
 class EvilGhost extends PersonalityGhost
 {
 	public EvilGhost(GHOST gT) 
@@ -200,7 +147,7 @@ class EvilGhost extends PersonalityGhost
 		}
 	}
 }
-// Comportamiento de ir a por Pacman..
+// Comportamiento de ir a por Pacman.
 class GoToPacmanGhost extends PersonalityGhost
 {
 	public GoToPacmanGhost(GHOST gT) 
@@ -274,7 +221,6 @@ class RunToSafeGhost extends PersonalityGhost
 public final class Ghosts extends GhostController
 {
     private EnumMap<GHOST, MOVE> moves = new EnumMap<GHOST, MOVE>(GHOST.class);
-    //private EnumMap<GHOST, GHOST_PARAMETERS> parameters = null;
     private EnumMap<GHOST, PersonalityGhost> personalities = null;
 
     private Random rnd = new Random(); // Para generar randoms.
@@ -282,16 +228,6 @@ public final class Ghosts extends GhostController
     @Override
     public EnumMap<GHOST, MOVE> getMove(Game game, long timeDue)
     {
-    	/*if(parameters == null)
-    	{
-			System.out.println("Creacion de Fantasmas.");
-        	parameters = new EnumMap<GHOST, GHOST_PARAMETERS>(GHOST.class);
-        	for (GHOST ghostType : GHOST.values())
-        	{
-        		parameters.put(ghostType, new GHOST_PARAMETERS(ghostType, 1, 0)); // Todos los fantasmas empiezan con personalidad 1.
-        		parameters.get(ghostType).changeGhostPersonality(rnd.nextInt(1, 6));
-        	}
-    	}*/
     	// Creacion de las personalidades, al principio todas random.
     	if(personalities == null)
     	{
@@ -310,58 +246,7 @@ public final class Ghosts extends GhostController
         {      	
         	// Calculamos camino si el fantasma lo necesita.
             if (game.doesGhostRequireAction(ghostType))
-            {	
-            	/*int personality = parameters.get(ghostType).getPersonality();
-            	// AQUI CALCULAR EL PATH
-            	
-            	switch (personality) 
-            	{
-				case 1: {
-					nextMove = personalityRandom();
-					break;
-				}
-				case 2: {
-					nextMove = personalityEvil();
-					break;
-				}
-				case 3: {
-					nextMove = personalityFront();
-					break;
-				}
-				case 4: {
-					nextMove = personalityBehind();
-					break;
-				}
-				case 5: {
-					nextMove = personalityPowerPills();
-					break;
-				}
-				default:
-					throw new IllegalArgumentException("Switch mal por: " + personality);
-				}
-            	
-           
-            	
-            	
-            	
-            	if(parameters.get(ghostType).getNextChange() <= 0)
-            	{
-            		parameters.get(ghostType).changeGhostPersonality(rnd.nextInt(1, 6));
-            	}
-            	else
-            	{
-            		parameters.get(ghostType).decrease();
-            	}
-            	
-            	if(nextMove == null)
-            	{
-            		throw new IllegalArgumentException("No movimento calculado");
-            	}
-            	else 
-            	{
-            		moves.put(ghostType, nextMove);            		
-            	}*/
-            	
+            {	         	
             	MoveCell nextMove = null;
             	
             	// Si el fantasma es comible miramos casos:
@@ -408,25 +293,8 @@ public final class Ghosts extends GhostController
                 		{
                 			//System.out.println("Ahora soy evil.");
                 			personalities.put(ghostType, new EvilGhost(ghostType));
-                			//moves.put(ghostType, game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghostType), game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghostType), DM.PATH));
-                			//continue;
                 		}
                 	}
-                	/*// Si MsPacMan se acerca mucho a una PowerPill => huir.
-                	double distanceToPill = 0;
-                	for(int pill : game.getActivePowerPillsIndices())
-                	{
-                		double auxDis = game.getDistance(game.getPacmanCurrentNodeIndex(), pill, DM.PATH);
-    					if(auxDis < distanceToPill || distanceToPill == 0)
-            			{
-    						distanceToPill = auxDis;
-            			}
-                	}
-                	if(distanceToPill < 10)
-                	{
-                		System.out.println("Ahora soy huida.");
-                		personalities.put(ghostType, new RunAwayGhost());
-                	}*/
             	}
             	
             	
@@ -439,7 +307,6 @@ public final class Ghosts extends GhostController
             	}
             	else
             	{
-            		System.out.println("MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL");
             		moves.put(ghostType, MOVE.NEUTRAL);
             	}
             }
@@ -449,6 +316,6 @@ public final class Ghosts extends GhostController
     
     public String getName()
     {
-    	return "GhostsAndrewPaigro";
+    	return "GhostGrupoL";
     }
 }
