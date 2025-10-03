@@ -1,10 +1,11 @@
 import java.util.Iterator;
 
-import es.ucm.fdi.ici.c2526.practica1.grupoYY.Ghosts;
-import es.ucm.fdi.ici.c2526.practica1.grupoYY.MsPacMan;
+import es.ucm.fdi.ici.c2526.practica1.grupoL.Ghosts;
+import es.ucm.fdi.ici.c2526.practica1.grupoL.MsPacMan;
 import pacman.Executor;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
+
 
 public class ExecutorTest {
 

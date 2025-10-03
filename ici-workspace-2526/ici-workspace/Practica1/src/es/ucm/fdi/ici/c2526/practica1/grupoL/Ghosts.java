@@ -1,4 +1,4 @@
-package es.ucm.fdi.ici.c2526.practica1.grupoYY;
+package es.ucm.fdi.ici.c2526.practica1.grupoL;
 
 import java.awt.Color;
 import java.util.EnumMap;
