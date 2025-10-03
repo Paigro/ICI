@@ -84,7 +84,7 @@ public class MsPacMan extends PacmanController
     		GHOST ghost = isGhost(game, currentNode);        	
         	if (ghost != null )
         		if(!game.isGhostEdible(ghost)) {
-        			System.out.println("HUYE");
+        			//System.out.println("HUYE");
         			runAway = true;
         		}
             
