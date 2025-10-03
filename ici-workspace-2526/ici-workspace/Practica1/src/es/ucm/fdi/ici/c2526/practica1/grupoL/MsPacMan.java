@@ -89,10 +89,10 @@ public class MsPacMan extends PacmanController
         		}
             
     		// Si hemos encontrado un camino valido terminamos la busqueda.
-    		/*if (evaluatePath(game, currentNode)) {
+    		if (evaluatePath(game, currentNode)) {
     	    	targetCell = current;
     			break;
-    		}*/
+    		}
     		
     		// Marcar como visitado.
     		visited[depth] = current.actualCell;
