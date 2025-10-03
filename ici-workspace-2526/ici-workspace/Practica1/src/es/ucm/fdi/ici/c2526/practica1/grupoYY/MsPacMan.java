@@ -25,10 +25,7 @@ public class MsPacMan extends PacmanController
     {
     	MoveCell objetiveCell = null;
     	if(requiereAccionPacman(game)) {
-    		if (runAway)
-    			objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 7);
-    		else
-    			objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 7);
+    		objetiveCell = nextMove(game, game.getPacmanCurrentNodeIndex(), 7);
     		if (objetiveCell != null) {
     			posObjetive = objetiveCell.actualCell;
     			while(objetiveCell.prevCell != null)
@@ -134,15 +131,9 @@ public class MsPacMan extends PacmanController
     private boolean isRunAwayPath(Game game, int id) {
     	GHOST ghost = isGhost(game, id);
     	
-    	if (ghost != null) {
-    		if (!game.isGhostEdible(ghost)) {
-    			if(isActivePowerPill(game, id)){
-    				System.out.println("HUYEE");
-    				return true;
-    			}
-    			return false;
+    	if (ghost!= null && game.isGhostEdible(ghost)) { 			
+    			return isActivePowerPill(game, id);
     		}
-    	}
     	return false;
     }
     
