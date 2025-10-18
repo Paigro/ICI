@@ -9,25 +9,25 @@ import org.mindswap.pellet.utils.Pair;
 
 import java.util.Map;
 
-public class Start2Cazar implements Transition {
+public class Cazar2Comer implements Transition {
     
-	public Start2Cazar() {}
+	public Cazar2Comer() {}
 
 	@Override
 	public boolean evaluate(Input in) {
         MsPacManInput m = (MsPacManInput) in;
         Map<GHOST, Boolean>  ghostEdible = m.getGhostEdible();
-		// Si se ha comido una powerPill hay al menos un fantasma comestible
+		// Si no encuentra fantasma comestible pasa a comer
 		for (Boolean ghost : ghostEdible.values()) {
 			if (ghost) {
-				return true;
+				return false;
 			}
 		}
-        return false;
+        return true;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Start2Cazar");
+		return String.format("Cazar2Comer");
 	}
 }

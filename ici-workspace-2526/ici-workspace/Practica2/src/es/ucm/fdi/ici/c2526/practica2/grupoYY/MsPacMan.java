@@ -34,23 +34,18 @@ public class MsPacMan extends PacmanController {
     	GraphFSMObserver observer = new GraphFSMObserver(fsm.toString());
     	fsm.addObserver(observer);
     	
-		// Estados simples principales
-    	SimpleState start = new SimpleState("randomState", new RandomAction());
     	// transiciones entre estados simples principales
     	// a comer
-    	Transition tranRandom1 = new RandomTransition(.5);
-    	Transition Huir2Comer = new Huir2Comer(10);
+    	Transition Cazar2Comer = new Cazar2Comer();
+    	Transition Huir2Comer = new Huir2Comer(40,60);
     	// a cazar
-		Transition Start2Cazar = new Start2Cazar();
-		Transition Comer2Cazar = new Comer2Cazar();
-		Transition Huir2Cazar = new Huir2Cazar();
+		Transition Comer2Cazar = new Comer2Cazar(20);
+		Transition Huir2Cazar = new Huir2Cazar(30, 20);
 		// a huir
-		Transition Comer2Huir = new Comer2Huir(7);
-		Transition Cazar2Huir = new Cazar2Huir(5);
-		Transition Start2Huir = new Start2Huir(10);
+		Transition Comer2Huir = new Comer2Huir(30, 20);
+		Transition Cazar2Huir = new Cazar2Huir(30, 20);
 		// a start
 		Transition Cazar2Start = new Cazar2Start();
-		Transition Comer2Start = new Comer2Start();
 		Transition Huir2Start = new Huir2Start();
     	
 		// Estados compuestos
@@ -59,7 +54,7 @@ public class MsPacMan extends PacmanController {
     	GraphFSMObserver c1observer = new GraphFSMObserver(cfsmComer.toString());
     	cfsmComer.addObserver(c1observer);
     	
-    	SimpleState cExplore = new SimpleState("Explore", new ExploreAction(20));
+    	SimpleState cExplore = new SimpleState("Explore", new ExploreAction(30));
     	SimpleState cCatch = new SimpleState("CatchPills", new CatchPillsAction());
     	Transition cCatch2Explore = new CatchPills2Explore(20);
     	Transition cExplore2CatchPil = new Explore2CatchPills(20);
@@ -88,7 +83,7 @@ public class MsPacMan extends PacmanController {
     	GraphFSMObserver c3observer = new GraphFSMObserver(cfsmHuir.toString());
     	cfsmHuir.addObserver(c3observer);
     	
-    	SimpleState cRunAway = new SimpleState("RunAway", new RunAwayAction(20));
+    	SimpleState cRunAway = new SimpleState("RunAway", new RunAwayAction(30));
     	SimpleState cCatchPowerPill = new SimpleState("CatchPowerPill", new CatchPowerPillsAction());
     	Transition cRunAway2CatchPowerPills = new RunAway2CatchPowerPills(10);
     	Transition cCatchPowerPills2RunAway = new CatchPowerPills2RunAway(10);
@@ -98,43 +93,29 @@ public class MsPacMan extends PacmanController {
     	CompoundState compoundHuir = new CompoundState("Huir", cfsmHuir);
 		
 		// Asignaciones de transiciones entre estados principales.
-    	// Start.
-    	fsm.add(start, tranRandom1, compoundComer);
-    	fsm.add(start, Start2Cazar, compoundCazar);
-    	fsm.add(start, Start2Huir, compoundHuir);
     	// Comer.
-    	fsm.add(compoundComer, Comer2Start, start);
     	fsm.add(compoundComer, Comer2Cazar, compoundCazar);
     	fsm.add(compoundComer, Comer2Huir, compoundHuir);
     	// Cazar.
-    	fsm.add(compoundCazar, Cazar2Start, start);
-    	//fsm.add(compoundCazar, Cazar2Comer, compoundComer);
+    	fsm.add(compoundCazar, Cazar2Start, compoundComer);
+    	fsm.add(compoundCazar, Cazar2Comer, compoundComer);
     	fsm.add(compoundCazar, Cazar2Huir, compoundHuir);
     	// Huir.
-    	fsm.add(compoundHuir, Huir2Start, start);
+    	fsm.add(compoundHuir, Huir2Start, compoundComer);
     	fsm.add(compoundHuir, Huir2Cazar, compoundCazar);
     	fsm.add(compoundHuir, Huir2Comer, compoundComer);
     	// Estado inicial
-    	fsm.ready(start);
+    	fsm.ready(compoundComer);
     	
     	
     	JFrame frame = new JFrame();
     	JPanel main = new JPanel();
     	main.setLayout(new BorderLayout());
     	main.add(observer.getAsPanel(true, null), BorderLayout.CENTER);
+    	main.add(c3observer.getAsPanel(true, null), BorderLayout.SOUTH);
     	frame.getContentPane().add(main);
     	frame.pack();
     	frame.setVisible(true);
-    	JFrame frame2 = new JFrame();
-    	JPanel second = new JPanel();
-    	second.setLayout(new BorderLayout());
-    	second.add(c1observer.getAsPanel(true, null), BorderLayout.CENTER);
-    	second.add(c2observer.getAsPanel(true, null), BorderLayout.CENTER);
-    	second.add(c3observer.getAsPanel(true, null), BorderLayout.CENTER);
-    	frame2.getContentPane().add(second);
-    	frame2.pack();
-    	frame2.setVisible(true);
-    	
 	}
 	
 	

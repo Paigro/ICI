@@ -21,7 +21,9 @@ public class RunAway2CatchPowerPills implements Transition {
 	public boolean evaluate(Input in) {
         MsPacManInput m = (MsPacManInput) in;
         // Si la pill esta dentro del limite va a por ella
-        return m.getPowerPill().get(0).second < limit;
+        if(m.getPowerPill().size()>0)
+        	return m.getPowerPill().get(0).second < limit;
+        return false;
 	}
 
 	@Override

@@ -4,29 +4,46 @@ import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.fsm.Transition;
 import pacman.game.Constants.GHOST;
+import pacman.game.Game;
 
 import org.mindswap.pellet.utils.Pair;
 
 import java.util.Map;
 
 public class Comer2Huir implements Transition {
-    int limit;
+	private int limit;          // Distancia de peligro
+    private int edibleThreshold; // Tiempo mínimo de "edible" para seguir cazando
     /**
-     * @param limit limite para ser considerado un fantasma dentro de la zona de peligro.
+     * @param limit distancia máxima a la que se considera peligro un fantasma
+     * @param edibleThreshold tiempo mínimo de edibleTime (en ticks) para considerarlo todavía seguro
      */
-	public Comer2Huir(int limit) {this.limit = limit;}
+    public Comer2Huir(int limit, int edibleThreshold) {
+        this.limit = limit;
+        this.edibleThreshold = edibleThreshold;
+    }
 
 	@Override
 	public boolean evaluate(Input in) {
-        MsPacManInput m = (MsPacManInput) in;
-        Map<GHOST, Integer>  ghostEdible = m.getGhostDistance();
-		// Si no hay ningun fantasma comestible pasa a comer
-		for (Integer ghost : ghostEdible.values()) {
-			if (ghost <= this.limit) {
-				return false;
-			}
+		MsPacManInput m = (MsPacManInput)in;
+		Game game = m.getGame();
+		Map<GHOST, Integer> ghostDistance = m.getGhostDistance();
+
+		for (Map.Entry<GHOST, Integer> e : ghostDistance.entrySet()) {
+			GHOST ghost = e.getKey();
+			int dist = e.getValue();
+
+			// Ignorar fantasmas lejanos.
+			if (dist == -1 || dist > this.limit)
+				continue;
+			// Si el fantasma NO es comestible y esta fuera de la carcel
+			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) == 0)
+				return true; // huir
+			// Si el fantasma ES comestible pero su tiempo esta a punto de acabarse
+			if (game.isGhostEdible(ghost) && game.getGhostEdibleTime(ghost) <= this.edibleThreshold)
+				return true;
+			
 		}
-        return true;
+		return false;
 	}
 
 	@Override
