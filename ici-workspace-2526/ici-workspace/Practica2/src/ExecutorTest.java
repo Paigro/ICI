@@ -1,3 +1,5 @@
+import java.util.Iterator;
+
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.Ghosts;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.MsPacMan;
 import pacman.Executor;
@@ -16,9 +18,11 @@ public class ExecutorTest {
         PacmanController pacMan = new MsPacMan();
         GhostController ghosts = new Ghosts();
         
-        System.out.println( 
-            executor.runGame(pacMan, ghosts, 30) //last parameter defines speed
-        );     
+        for (int i = 0; i < 1; i++) {
+        	System.out.println( 
+        			executor.runGame(pacMan, ghosts, 20) //last parameter defines speed
+        			);     
+		}
     }
 	
 }
