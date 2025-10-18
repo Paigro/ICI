@@ -4,27 +4,23 @@ import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.ghosts.GhostsInput;
 import es.ucm.fdi.ici.fsm.Transition;
 
-public class PacManNearPPillTransition implements Transition {
+public class MoreEdibleGhost implements Transition {
 
-	public static double thresold = 30;
-	public int num = 0;
-	
-	public PacManNearPPillTransition() {
+	public MoreEdibleGhost() {
 		super();
 	}
-
-
+	
 	@Override
 	public boolean evaluate(Input in) {
-		GhostsInput input = (GhostsInput) in;
-		return input.getMinPacmanDistancePPill() < thresold;
+		GhostsInput input = (GhostsInput)in;
+		return input.moreGhostEdible();
 	}
-
 
 	@Override
 	public String toString() {
-		return "MsPacman near PPill " + num;
+		return "There are more edible ghost";
 	}
+
+	
 	
 }
-

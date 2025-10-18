@@ -5,40 +5,26 @@ import es.ucm.fdi.ici.c2526.practica2.grupoYY.ghosts.GhostsInput;
 import es.ucm.fdi.ici.fsm.Transition;
 import pacman.game.Constants.GHOST;
 
-public class GhostsEdibleTransition implements Transition  {
+public class PacManNear implements Transition {
 
 	GHOST ghost;
+	public static double thresold = 80;
 	public int num = 0;
-	public GhostsEdibleTransition(GHOST ghost) {
+	public PacManNear(GHOST ghost) {
 		super();
 		this.ghost = ghost;
-		num++;
+		this.num++;
 	}
-
-
-
+	
 	@Override
 	public boolean evaluate(Input in) {
 		GhostsInput input = (GhostsInput)in;
-		switch(ghost) {
-			case BLINKY:
-				return input.isBLINKYedible();
-			case INKY:
-				return input.isINKYedible();
-			case PINKY:
-				return input.isPINKYedible();
-			case SUE:
-				return input.isSUEedible();
-			default:
-				return false;
-		}
+		return input.getDistGhostToPacman(ghost) < thresold;
 	}
-
-
 
 	@Override
 	public String toString() {
-		return this.ghost+" edible " + num;
+		return this.ghost + " is near to Pacman " + this.num;
 	}
 
 	

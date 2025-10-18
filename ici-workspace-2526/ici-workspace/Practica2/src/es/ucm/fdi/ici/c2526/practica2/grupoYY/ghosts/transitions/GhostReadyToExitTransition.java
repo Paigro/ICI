@@ -3,28 +3,27 @@ package es.ucm.fdi.ici.c2526.practica2.grupoYY.ghosts.transitions;
 import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.ghosts.GhostsInput;
 import es.ucm.fdi.ici.fsm.Transition;
+import pacman.game.Constants.GHOST;
 
-public class PacManNearPPillTransition implements Transition {
+public class GhostReadyToExitTransition implements Transition {
 
-	public static double thresold = 30;
-	public int num = 0;
-	
-	public PacManNearPPillTransition() {
+	GHOST ghost;
+	public GhostReadyToExitTransition(GHOST ghost) {
 		super();
+		this.ghost = ghost;
 	}
-
-
+	
 	@Override
 	public boolean evaluate(Input in) {
-		GhostsInput input = (GhostsInput) in;
-		return input.getMinPacmanDistancePPill() < thresold;
+		GhostsInput input = (GhostsInput)in;
+		return !input.isGhostInLair(ghost);
 	}
-
 
 	@Override
 	public String toString() {
-		return "MsPacman near PPill " + num;
+		return ghost + " ready to exit lair";
 	}
+
+	
 	
 }
-
